@@ -1,0 +1,19 @@
+.addMemo {
+    height: 1rem;
+    width: 98%;
+    position: relative;
+
+}
+
+.addMemo:hover {
+    background-color: #AAFFAA;
+}
+
+.addMemo:hover::after {
+    content: "+";
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    font-size: 2rem;
+    transform: translate(-50%, -50%);
+}
