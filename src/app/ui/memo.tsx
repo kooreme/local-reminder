@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import styles from "./memo.module.css";
-import { MemoInfo, UpdateFactory } from "../types/memo";
+import { DeleteMemo, MemoInfo, UpdateMemo } from "../types/memo";
 
-type WhiteBlack = "white" | "black"
+type PermitTextColor = "white" | "black"
 
 const COLOR_BASIS = 128 * 3;
 
-export default function Memo({ i, info, updateFactory }: { i: number, info: MemoInfo, updateFactory: UpdateFactory }) {
-    function checkColor(backgroundColor: string): WhiteBlack {
+export default function Memo({ i, info, updater, deleter }: { i: number, info: MemoInfo, updater: UpdateMemo, deleter: DeleteMemo }) {
+    function calcTextColor(backgroundColor: string): PermitTextColor {
         const colorSum = backgroundColor
             .slice(1)
             .match(/.{2}/g)
@@ -19,30 +19,33 @@ export default function Memo({ i, info, updateFactory }: { i: number, info: Memo
         return colorSum < COLOR_BASIS ? "white" : "black";
     }
     const { color: backgroundColor, deadline, description } = info;
-    const [color, setColor] = useState(checkColor(backgroundColor ? backgroundColor : "#ffffff"));
+    const [textColor, setTextColor] = useState(calcTextColor(backgroundColor ? backgroundColor : "#ffffff"));
+
     return (
         <>
-            <div className={styles.memo} style={{ backgroundColor, color }}>
+            <div className={styles.memo} style={{ backgroundColor, color: textColor }}>
+                <div className={styles.delete} onClick={() => deleter(i)} />
+                <input type="checkbox" className={styles.checkbox} checked={info.isComplete} onChange={(e) => updater(info, "isComplete", e.target.checked, i)} />
                 <div className={styles.maxcontent}>
                     <label htmlFor="deadline">期限：</label>
                     <input name="deadline" type="datetime-local"
-                        className={`${styles.datetime} ${color === "black" ? styles.black : styles.white}`}
+                        className={`${styles.datetime} ${textColor === "black" ? styles.black : styles.white}`}
                         pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
                         value={deadline}
-                        onChange={(e) => updateFactory("deadline")(info, e.target.value, i)}
+                        onChange={(e) => updater(info, "deadline", e.target.value, i)}
                     />
                     <div className={styles.dummy}>
                         {description + "\u200b"}
                         <Textarea
-                            color={color}
+                            color={textColor}
                             description={description}
-                            change={(value) => updateFactory("description")(info, value, i)}
+                            change={(value) => updater(info, "description", value, i)}
                         />
                     </div>
                 </div>
                 <input className={styles.color} value={backgroundColor} type="color" onChange={(e) => {
-                    setColor(checkColor(e.target.value));
-                    updateFactory("color")(info, e.target.value, i);
+                    setTextColor(calcTextColor(e.target.value));
+                    updater(info, "color", e.target.value, i);
                 }} />
             </div>
         </>
@@ -51,7 +54,7 @@ export default function Memo({ i, info, updateFactory }: { i: number, info: Memo
 
 function Textarea({ description, color, change }: {
     description: string,
-    color: WhiteBlack,
+    color: PermitTextColor,
     change: (value: string) => void,
 }) {
     return (
