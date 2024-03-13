@@ -2,7 +2,18 @@
     height: 1rem;
     width: 98%;
     position: relative;
+    transition: all .2s;
+}
 
+.addMemo::after {
+    content: "+";
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    font-size: 2rem;
+    transform: translate(-50%, -50%);
+    transition: opacity .2s;
+    opacity: 0;
 }
 
 .addMemo:hover {
@@ -10,10 +21,5 @@
 }
 
 .addMemo:hover::after {
-    content: "+";
-    position: absolute;
-    left: 50%;
-    top: 40%;
-    font-size: 2rem;
-    transform: translate(-50%, -50%);
+    opacity: 1;
 }

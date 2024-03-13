@@ -1,10 +1,9 @@
 "use client";
 import styles from "./page.module.css";
-import Memo from "./ui/memo";
-import { DEFAULT_BACKGROUND_COLOR, MemoInfo, UpdateMemo } from "./types/memo";
+import { CreateMemo, CreatePartialMemoListInfo, MemoInfo, PartialMemoListInfo, UpdateMemo } from "./types/memo";
 import { useEffect, useState } from "react";
-import AddMemo from "./ui/add-memo";
 import dayjs from "dayjs";
+import PartialMemoList from "./ui/partial-memo-list";
 
 export default function Home() {
   const [memos, setMemos] = useState<MemoInfo[]>([]);
@@ -15,45 +14,38 @@ export default function Home() {
     setMemos(start);
   }, []);
 
-  const updateDataInMemo: UpdateMemo = (memo, propName, newValue, index) => {
+  const updateDataInMemo: UpdateMemo = (memo, propName, newValue) => {
     if (memos.length === 0) return;
     const copyMemo = { ...memo };
 
     //クソダサい（
-    if (newValue != null) {
-      switch (propName) {
-        case "color":
-        case "deadline":
-        case "description":
-          if (typeof newValue === "string") copyMemo[propName] = newValue;
-          break;
-        case "isComplete":
-          if (typeof newValue === "boolean") copyMemo[propName] = newValue;
-          break;
-      }
+    if (newValue == null) return;
+    switch (propName) {
+      case "color":
+      case "deadline":
+      case "description":
+        if (typeof newValue === "string") copyMemo[propName] = newValue;
+        break;
+      case "isComplete":
+        if (typeof newValue === "boolean") copyMemo[propName] = newValue;
+        break;
     }
     const copyMemos = [...memos];
-    copyMemos[index] = copyMemo;
+    copyMemos[copyMemos.findIndex(m => m.id === memo.id)] = copyMemo;
     recordAndSetMemos(copyMemos);
   }
 
-  const createMemo = (i: number) => {
-    const create = (id: number) => ({
-      id: id,
-      description: "",
-      color: DEFAULT_BACKGROUND_COLOR,
-      deadline: dayjs().format("YYYY-MM-DDTHH:mm"),
-      isComplete: false
-    });
-
-    if (memos.length === 0) return setMemos([create(0)]);
-
+  const createMemo = (i: number, template: CreateMemo) => {
+    if (memos.length === 0) {
+      return recordAndSetMemos([template(0)]);
+    }
     const id = Math.max(...memos.map(m => m.id)) + 1;
-    const copyMemos = [...memos].slice(0, i)?.concat(create(id), [...memos].slice(i));
+    const copyMemos = [...memos].slice(0, i)?.concat(template(id), [...memos].slice(i));
     recordAndSetMemos(copyMemos);
   }
-  const deleteMemo = (i: number) => {
-    const copyMemos = memos.toSpliced(i, 1);
+
+  const deleteMemo = (memo: MemoInfo) => {
+    const copyMemos = memos.filter(m => m !== memo);
     recordAndSetMemos(copyMemos);
   }
   const recordAndSetMemos = (memos: MemoInfo[]) => {
@@ -61,16 +53,81 @@ export default function Home() {
     setMemos(memos);
   }
 
-  const memoLists = memos?.map((memo, i) =>
-    <div key={memo.id} className={styles.memoList}>
-      <Memo i={i} info={memo} updater={updateDataInMemo} deleter={deleteMemo} />
-      <AddMemo i={i + 1} onclick={createMemo} />
-    </div>
+  const createPartialMemoListInfo: (
+    memos: MemoInfo[],
+    startNum: number,
+    options: CreatePartialMemoListInfo
+  ) => PartialMemoListInfo =
+    (memos, startNum, { name, isPermitCreatingNewMemo, filter, deadlineFunction }) => {
+      const filteredMemos = memos.filter(filter);
+      return {
+        name,
+        isPermitCreatingNewMemo,
+        memos: filteredMemos,
+        startNum,
+        deadlineFunction
+      }
+    };
+  const createListInfo: CreatePartialMemoListInfo[] = [
+    {
+      name: "24時間以内 or 期限切れ",
+      isPermitCreatingNewMemo: true,
+      filter: (memo: MemoInfo) => {
+        if (memo.isComplete) return false;
+        if (memo.deadline == null || memo.deadline === "") return false;
+        const now = dayjs().valueOf();
+        const deadline = dayjs(memo.deadline).valueOf();
+        return deadline - now < 1000 * 60 * 60 * 24;
+      },
+      deadlineFunction: () => dayjs().format("YYYY-MM-DDTHH:mm")
+    },
+    {
+      name: "期限なし",
+      isPermitCreatingNewMemo: true,
+      filter: (memo: MemoInfo) => {
+        if (memo.isComplete) return false;
+        return memo.deadline == null || memo.deadline === "";
+      },
+    },
+    {
+      name: "タスク完了",
+      isPermitCreatingNewMemo: false,
+      filter: (memo: MemoInfo) => memo.isComplete,
+    },
+  ];
+
+  let startNum = 0;
+  const partialMemoLists: PartialMemoListInfo[] = [];
+  for (let c of createListInfo) {
+    const lists = createPartialMemoListInfo(memos, startNum, c);
+    startNum += lists.memos.length;
+    partialMemoLists.push(lists);
+  }
+  const exclusionMemoList = partialMemoLists.map(ml => ml.memos).flat();
+  const otherMemoList = memos.filter(memo => !exclusionMemoList.includes(memo));
+  partialMemoLists.push({
+    name: "24時間以上",
+    isPermitCreatingNewMemo: false,
+    memos: otherMemoList,
+    startNum
+  });
+
+  const createPartialMemoListElement = partialMemoLists.map((ml, i) =>
+    <PartialMemoList
+      name={ml.name}
+      memos={ml.memos}
+      startNum={ml.startNum}
+      updater={updateDataInMemo}
+      deleter={deleteMemo}
+      adder={ml.isPermitCreatingNewMemo ? createMemo : undefined}
+      deadline={ml.deadlineFunction}
+      key={i}
+    />
   );
+
   return (
     <main className={styles.main}>
-      <AddMemo i={0} onclick={createMemo} />
-      {memoLists}
+      {createPartialMemoListElement}
     </main>
   );
 }

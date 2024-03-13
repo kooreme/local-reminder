@@ -1,0 +1,19 @@
+.flexColumn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.kindTitle {
+    align-self: flex-start;
+    margin: 10px 1% 0;
+    font-size: large;
+    font-weight: bold;
+}
+
+.hr {
+    width: 100%;
+    border-color: rgba(128, 128, 128, 0.25);
+}
