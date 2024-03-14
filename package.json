@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
+    "cache-build-and-start": "cd scripts & cache-build.sh",
     "dev": "next dev -p 62085",
     "build": "next build",
     "start": "next start -p 62085",
