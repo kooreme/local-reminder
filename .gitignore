@@ -16,6 +16,9 @@
 # production
 /build
 
+# scripts tempolary data
+/scripts/.buildhash
+
 # static export
 /dist
 
