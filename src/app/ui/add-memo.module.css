@@ -6,14 +6,23 @@
 }
 
 .addMemo::after {
-    content: "+";
+    content: "➕";
     position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid #99999999;
     left: 50%;
-    top: 40%;
-    font-size: 2rem;
+    top: 50%;
+    font-size: 0.75rem;
     transform: translate(-50%, -50%);
     transition: opacity .2s;
     opacity: 0;
+    z-index: 1;
 }
 
 .addMemo:hover {
@@ -21,5 +30,5 @@
 }
 
 .addMemo:hover::after {
-    opacity: 1;
+    opacity: 0.6;
 }
