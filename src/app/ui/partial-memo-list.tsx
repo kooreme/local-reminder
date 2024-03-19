@@ -4,10 +4,9 @@ import Memo from "./memo";
 import styles from "./partial-memo-list.module.css";
 
 //メモリストを描画するコンポーネント
-export default function PartialMemoList({ name, memos, startNum, updater, deleter, adder, deadline }: {
+export default function PartialMemoList({ name, memos, updater, deleter, adder, deadline }: {
     name: string
     memos: MemoInfo[]
-    startNum: number
     updater: UpdateMemo
     deleter: DeleteMemo
     adder?: (i: number, template: CreateMemo) => void
@@ -21,10 +20,10 @@ export default function PartialMemoList({ name, memos, startNum, updater, delete
         )
     }
     //各メモコンポーネントを描画
-    const memoList = memos.map((memo, i) =>
+    const memoList = memos.map((memo) =>
         <div key={memo.id} className={styles.flexColumn}>
             <Memo memoInfo={memo} updater={updater} deleter={deleter} />
-            {OptionalAddMemo(i + startNum + 1)}
+            {OptionalAddMemo(memo.id)}
         </div>
     );
     //描画内容の返却
@@ -32,7 +31,9 @@ export default function PartialMemoList({ name, memos, startNum, updater, delete
         <>
             <div className={styles.flexColumn}>
                 <p className={styles.kindTitle}>{name}</p>
-                {OptionalAddMemo(startNum)}
+                <div className={styles.flexColumn}>
+                    {OptionalAddMemo(0)}
+                </div>
                 {memoList}
             </div>
             <hr className={styles.hr} />

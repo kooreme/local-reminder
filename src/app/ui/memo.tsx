@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import styles from "./memo.module.css";
-import { DeleteMemo, MemoInfo, UpdateMemo } from "../types/memo";
-
-//文字色を白or黒に固定する。
-type PermitTextColor = "white" | "black"
+import { DeleteMemo, MemoInfo, PermitTextColor, UpdateMemo } from "../types/memo";
+import AutoResizeTextarea from "./auto-resize-textarea";
+import DateTimeLocal from "./datetime-local";
+import CloseMemo from "./close-memo";
 
 //文字色の変更基準
 const COLOR_BASIS = 128 * 3;
@@ -32,24 +32,20 @@ export default function Memo({ memoInfo, updater, deleter }: { memoInfo: MemoInf
     return (
         <>
             <div className={styles.memo} style={{ backgroundColor, color: textColor }}>
-                <div className={styles.delete} onClick={() => deleter(memoInfo)} />
+                <CloseMemo deleter={() => deleter(memoInfo)} />
                 <input type="checkbox" className={styles.checkbox} checked={memoInfo.isComplete} onChange={(e) => updater(memoInfo, "isComplete", e.target.checked)} />
                 <div className={styles.maxcontent}>
                     <label htmlFor="deadline">期限：</label>
-                    <input name="deadline" type="datetime-local"
-                        className={`${styles.datetime} ${textColor === "black" ? styles.black : styles.white}`}
-                        pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
-                        value={deadline}
-                        onChange={(e) => updater(memoInfo, "deadline", e.target.value)}
+                    <DateTimeLocal
+                        styleName={textColor}
+                        datetime={deadline}
+                        blur={(value) => updater(memoInfo, "deadline", value)}
                     />
-                    <div className={styles.dummy}>
-                        {description + "\u200b"}
-                        <Textarea
-                            color={textColor}
-                            description={description}
-                            change={(value) => updater(memoInfo, "description", value)}
-                        />
-                    </div>
+                    <AutoResizeTextarea
+                        description={description}
+                        color={textColor}
+                        blur={(value) => updater(memoInfo, "description", value)}
+                    />
                 </div>
                 <input className={styles.color} value={backgroundColor} type="color" onChange={(e) => {
                     setTextColor(calcTextColor(e.target.value));
@@ -57,21 +53,5 @@ export default function Memo({ memoInfo, updater, deleter }: { memoInfo: MemoInf
                 }} />
             </div>
         </>
-    );
-}
-
-//メモ内のテキストエリア用コンポーネント
-function Textarea({ description, color, change }: {
-    description: string,
-    color: PermitTextColor,
-    change: (value: string) => void,
-}) {
-    return (
-        <textarea
-            style={{ color }}
-            className={styles.description}
-            value={description}
-            onChange={(e) => change(e.target.value)}
-        />
     );
 }

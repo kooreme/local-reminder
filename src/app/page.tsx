@@ -19,6 +19,7 @@ export default function Home() {
 
   //メモ内の情報を更新する関数
   const updateDataInMemo: UpdateMemo = (memo, propName, newValue) => {
+
     if (memos.length === 0) return;
     const copyMemo = { ...memo };
 
@@ -42,12 +43,14 @@ export default function Home() {
 
   //メモを新規作成する関数
   const createMemo = (i: number, template: CreateMemo) => {
+
     if (memos.length === 0) {
       return recordAndSetMemos([template(0)]);
     }
     const id = Math.max(...memos.map(m => m.id)) + 1;
+    const findMemoIndex = memos.findIndex(m => m.id === i) + 1;
     //メモリストをシャローコピーしながら、新しいメモを指定位置に挟み込む
-    const copyMemos = [...memos].slice(0, i)?.concat(template(id), [...memos].slice(i));
+    const copyMemos = [...memos].slice(0, findMemoIndex)?.concat(template(id), [...memos].slice(findMemoIndex));
     recordAndSetMemos(copyMemos);
   }
 
@@ -144,7 +147,6 @@ export default function Home() {
     <PartialMemoList
       name={ml.name}
       memos={ml.memos}
-      startNum={ml.startNum}
       updater={updateDataInMemo}
       deleter={deleteMemo}
       adder={ml.isPermitCreatingNewMemo ? createMemo : undefined}

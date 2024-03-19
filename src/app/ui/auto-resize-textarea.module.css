@@ -1,0 +1,34 @@
+.description_base {
+    border: 0;
+    background-color: transparent;
+    font-size: 1rem;
+    font-family: inherit;
+    flex-grow: 1;
+    position: relative;
+    color: inherit;
+    opacity: 1;
+    white-space: pre-wrap;
+    padding-left: 5px;
+}
+
+.description_textarea {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background-color: transparent;
+    font-size: 1rem;
+    font-family: inherit;
+    color: inherit;
+    flex-grow: 1;
+    padding-left: 5px;
+    white-space: pre-wrap;
+    resize: none;
+}
+
+.description_textarea:focus-visible {
+    outline-width: 1px;
+    outline-color: rgba(128, 128, 128, 0.5);
+}

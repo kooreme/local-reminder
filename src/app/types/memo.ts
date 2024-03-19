@@ -22,4 +22,5 @@ export type CreatePartialMemoListInfo = {
     filter: (memo: MemoInfo) => boolean,
     deadlineFunction?: () => string
 }
+export type PermitTextColor = "white" | "black"
 //export const DEFAULT_BACKGROUND_COLOR = "#ccffbb" as const;

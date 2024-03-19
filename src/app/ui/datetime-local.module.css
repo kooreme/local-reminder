@@ -1,0 +1,16 @@
+.datetime {
+    font-family: inherit;
+    color: inherit;
+    font-size: 0.8rem;
+    background-color: transparent;
+    border: 0;
+    margin-bottom: 3px;
+}
+
+.black::-webkit-calendar-picker-indicator {
+    filter: invert(0%);
+}
+
+.white::-webkit-calendar-picker-indicator {
+    filter: invert(100%);
+}
